@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.EntityFrameworkCore;
 using Openlet.Data;
 using Openlet.Models;
@@ -5,9 +7,7 @@ using Openlet.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+
 
 builder.Services.AddDbContext<OpenletContext>(options =>
 {
@@ -15,6 +15,16 @@ builder.Services.AddDbContext<OpenletContext>(options =>
     options.UseSqlite(connectionString);
     options.EnableSensitiveDataLogging();
 });
+
+builder.Services.AddDefaultIdentity<User>().AddEntityFrameworkStores<OpenletContext>();
+
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+
+builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); 
 
 var app = builder.Build();
 
@@ -32,6 +42,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
