@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Openlet.Data;
+using Openlet.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+builder.Services.AddDbContext<OpenletContext>(options =>
+{
+    var connectionString = builder.Configuration.GetSection("ConnectionString").Value;
+    options.UseSqlite(connectionString);
+    options.EnableSensitiveDataLogging();
+});
 
 var app = builder.Build();
 
