@@ -1,0 +1,64 @@
+﻿@page "/createLernset"
+@using Openlet.Models
+@using Microsoft.EntityFrameworkCore
+@inject OpenletContext OpenletContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<p>Name des Lernsets:</p>
+<input class="form-control mt-1" @bind="_studySetName"/>
+<ul id="Cards" class="p-0">
+    @foreach (var card in _cards)
+    {
+        <li class="card mt-2">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-end">
+                    <p class="mb-0">Begriff: </p>
+                    <button class="btn btn-danger fs-6 deleteCard" @onclick="() => DeleteCard(card)"><i class="bi bi-file-earmark-x"></i></button>
+                </div>
+                <input type="text" class="form-control mt-1 mb-2" value="@card.Term" @onchange="e => card.Term = e.Value?.ToString()?? string.Empty">
+                <p>Definition:</p>
+                <input type="text" class="form-control mt-1" value="@card.Definition" @onchange="e => card.Definition = e.Value?.ToString() ?? string.Empty">
+            </div>
+        </li>
+    }
+</ul>
+<button type="button" class="btn btn-primary" @onclick="AddCard">Karte Hinzufügen</button>
+<br>
+<input type="submit" class="btn btn-primary mt-2" value="Create Learnset" @onclick="CreateNewStudySet"/>
+
+
+@code
+{
+    private string _studySetName = string.Empty;
+    private readonly List<Card> _cards = new();
+
+    private void AddCard()
+    {
+        _cards.Add(new Card());
+    }
+
+    private void DeleteCard(Card card)
+    {
+        _cards.Remove(card);
+    }
+
+    private async Task CreateNewStudySet()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var username = authState.User.Identity?.Name;
+        var user = await OpenletContext.Users.FirstOrDefaultAsync(x => x.Email == username);
+
+        if (user is null)
+            return;
+        
+        var studySet = new StudySet
+        {
+            Cards = _cards,
+            Name = _studySetName,
+            User = user
+        };
+
+        await OpenletContext.StudySets.AddAsync(studySet);
+        await OpenletContext.SaveChangesAsync();
+    }
+}

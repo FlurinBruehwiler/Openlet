@@ -1,0 +1,35 @@
+﻿@page "/learn/{StudySetId:int}"
+
+<style>
+    .cardContainer{
+        display: flex;
+        justify-content: center;
+    }
+</style>
+
+<div class="cardContainer">
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <p class="term">Term 1</p>
+            <input type="text" class="form-control">
+            <button type="button" class="btn btn-primary mt-2">Sumbit</button>
+        </div>
+    </div>
+    <div class="multipleChoice">
+        
+    </div>
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <p>Wrong! The correct Definition is:</p>
+            <p class="correct"></p>
+            <button type="button" class="btn btn-primary mt-2 correctNextCard">Next Card</button>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    [Parameter]
+    public int StudySetId { get; set; }
+}
+

@@ -1,0 +1,53 @@
+﻿@page "/studySet/{StudySetId:int}"
+@using Openlet.Models
+@using Microsoft.EntityFrameworkCore
+@inject OpenletContext OpenletContext
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>@_studySet?.Name</h1>
+
+<a class="btn btn-primary" href="/learn/@StudySetId">Learn</a>
+<button type="button" class="btn btn-primary editButton">Edit</button>
+<button type="button" class="btn btn-primary shareButton">Share</button>
+
+<table class="table mt-5">
+    <thead>
+    <tr>
+        <th scope="col">Term</th>
+        <th scope="col">Definition</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (_studySet?.Cards is not null)
+    {
+        foreach (var card in _studySet?.Cards!)
+        {
+            <tr>
+                <td>@card.Term</td>
+                <td>@card.Definition</td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+@code
+{
+    [Parameter]
+    public int StudySetId { get; set; }
+    
+    private StudySet? _studySet;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var username = authState.User.Identity?.Name;
+
+        var user = await OpenletContext.Users.Where(x => x.Email == username)
+            .Include(x => x.StudySets!.Where(y => y.StudySetId == StudySetId))
+            .ThenInclude(x => x.Cards).FirstOrDefaultAsync();
+
+        _studySet = user?.StudySets?.FirstOrDefault(x => x.StudySetId == StudySetId);
+    }
+}
