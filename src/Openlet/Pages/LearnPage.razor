@@ -1,4 +1,9 @@
 ﻿@page "/learn/{StudySetId:int}"
+@using Openlet.Models
+@using Microsoft.EntityFrameworkCore
+@using Openlet.Services
+@inject OpenletContext OpenletContext
+@inject UserService _userSerive
 
 <style>
     .cardContainer{
@@ -31,5 +36,16 @@
 {
     [Parameter]
     public int StudySetId { get; set; }
+
+    private Learn _learn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await _userSerive.GetUser();
+
+        _learn = await OpenletContext.Learns
+            .Where(x => x.StudySetId == StudySetId && x.User.Id == user.Id)
+            .FirstOrDefaultAsync() ?? new Learn();
+    }
 }
 

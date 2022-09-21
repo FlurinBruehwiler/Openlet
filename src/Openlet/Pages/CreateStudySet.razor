@@ -1,6 +1,7 @@
 ﻿@page "/createLernset"
 @using Openlet.Models
-@using Microsoft.EntityFrameworkCore
+@using Openlet.Services
+@inject UserService _UserService
 @inject OpenletContext OpenletContext
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -44,13 +45,8 @@
 
     private async Task CreateNewStudySet()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var username = authState.User.Identity?.Name;
-        var user = await OpenletContext.Users.FirstOrDefaultAsync(x => x.Email == username);
+        var user = await _UserService.GetUser();
 
-        if (user is null)
-            return;
-        
         var studySet = new StudySet
         {
             Cards = _cards,

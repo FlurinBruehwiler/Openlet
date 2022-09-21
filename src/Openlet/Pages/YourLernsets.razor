@@ -1,18 +1,16 @@
 ﻿@page "/yourLernsets"
 @using Openlet.Models
-@using Microsoft.EntityFrameworkCore
+@using Openlet.Services
 @attribute [Authorize]
 @inject OpenletContext OpenletContext
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserService UserService
 
 <PageTitle>Counter</PageTitle>
 
 <a href="/createLernset" class="btn btn-primary">Lernset Erstellen</a>
 
-<p>@_username</p>
-
 <div class="list-group mt-3">
-    @foreach (var studySet in OpenletContext.StudySets.Where(x => x.User == _user))
+    @foreach (var studySet in _studySets)
     {
         <a href="/StudySet/@studySet.StudySetId" class="list-group-item list-group-item-action">@studySet.Name</a>
     }
@@ -21,16 +19,11 @@
 
 
 @code{
-
-    private User? _user;
-    private string? _username;
+    private List<StudySet> _studySets;
     
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-        _username = authState.User.Identity?.Name;
-
-        _user = await OpenletContext.Users.FirstOrDefaultAsync(x => x.Email == _username);
+        var user = await UserService.GetUser();
+        _studySets = OpenletContext.StudySets.Where(x => x.User == user).ToList();
     }
 }
